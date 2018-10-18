@@ -46,12 +46,13 @@ codeStr="57c56b6c766b00527ac46c766b51527ac4616c766b51c300c36c766b52527ac46c766b5
             System.out.println("Entrypoint:" + abiinfo.getEntrypoint());
             System.out.println("contractAddress:"+abiinfo.getHash());
             System.out.println("Functions:" + abiinfo.getFunctions());
-            AbiFunction func = abiinfo.getFunction("Transfer");
+            AbiFunction func = abiinfo.getFunction("BalanceOf");
             func.name = func.name.toLowerCase();
             Map map = new HashMap<>();
             map.put("key","world");
          //   func.setParamsValue(BuildParams.getMapBytes(map), recv.toArray(), Long.valueOf(19*10000000));//
-            func.setParamsValue(acct1.getAddressU160().toArray(), recv.toArray(), Long.valueOf(19*10000000));
+//            func.setParamsValue(acct1.getAddressU160().toArray(), recv.toArray(), Long.valueOf(19*10000000));
+            func.setParamsValue(acct1.getAddressU160().toArray());
             byte[] params = BuildParams.serializeAbiFunction(func);
             params = Helper.addBytes(params, new byte[]{0x67});
            // params = Helper.addBytes(params, Helper.hexToBytes(str));

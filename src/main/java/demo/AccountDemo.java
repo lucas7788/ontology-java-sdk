@@ -18,6 +18,12 @@ public class AccountDemo {
 
         try {
             OntSdk ontSdk = getOntSdk();
+            if(true){
+                String res = new String(Base64.getEncoder().encode("0107c264fa944f7d".getBytes()));
+                System.out.println("res: " + res);
+                return;
+            }
+
             byte[] saltt = Base64.getDecoder().decode("0X3NC1UHQGltHc4ikzgzmA==");
             String prikeyg = com.github.ontio.account.Account.getGcmDecodedPrivateKey("7a1ccOWFQUGl0HQmc+PSLeKMwbVZ45/YDHTH/+um4O1z/YAWuv+vsr9zusvYXWbj", "1","ANH5bHrrt111XwNEnuPZj6u95Dd6u7G4D6",saltt,16384,ontSdk.defaultSignScheme);
             com.github.ontio.account.Account a = new com.github.ontio.account.Account(Helper.hexToBytes(prikeyg),ontSdk.defaultSignScheme);

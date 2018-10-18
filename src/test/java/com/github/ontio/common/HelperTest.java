@@ -12,8 +12,12 @@ public class HelperTest {
 
     @Test
     public void bigInt2Bytes() {
+        BigIntToNeoBytes(new BigInteger("-136"));
         assertArrayEquals(new byte[] {-85, -86, -86, -86, -86, -86, -85, -128}, BigIntToNeoBytes(new BigInteger("-9175052165852779861")));
 
+        byte[] sss = BigIntToNeoBytes(new BigInteger("-9175052165852779861"));
+        String ssstr = Helper.toHexString(sss);
+        BigInteger aa = BigIntFromNeoBytes(sss);
         assertArrayEquals(new byte[] {85, 85, 85, 85, 85, 85, 84, 127}, BigIntToNeoBytes(new BigInteger("9175052165852779861")));
 
         assertArrayEquals(new byte[] {85, 85, 85, 85, 85, 85, 84, -128}, BigIntToNeoBytes(new BigInteger("-9199634313818843819")));
