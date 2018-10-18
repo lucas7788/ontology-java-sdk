@@ -240,7 +240,7 @@ public class Oep4 {
         return balance;
     }
 
-    public String queryBalanceOf(String addr) throws Exception {
+    public long queryBalanceOf(String addr) throws Exception {
         if (contractAddress == null) {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
@@ -256,7 +256,7 @@ public class Oep4 {
         if(balance.equals("")){
             balance = "00";
         }
-        return balance;
+        return Long.parseLong(Helper.reverse(balance), 16);
     }
 
     public String queryTotalSupply() throws Exception {
@@ -283,7 +283,7 @@ public class Oep4 {
         return ((JSONObject) obj).getString("Result");
     }
 
-    public String queryDecimals() throws Exception {
+    public long queryDecimals() throws Exception {
         if (contractAddress == null) {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
@@ -292,7 +292,7 @@ public class Oep4 {
         func.name = "decimals";
         func.setParamsValue();
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
-        return ((JSONObject) obj).getString("Result");
+        return Long.parseLong(Helper.reverse(((JSONObject) obj).getString("Result")), 16);
     }
 
     public String querySymbol() throws Exception {

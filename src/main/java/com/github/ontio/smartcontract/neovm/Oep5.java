@@ -6,6 +6,7 @@ import com.github.ontio.OntSdk;
 import com.github.ontio.account.Account;
 import com.github.ontio.common.Address;
 import com.github.ontio.common.ErrorCode;
+import com.github.ontio.common.Helper;
 import com.github.ontio.core.oep5.Oep5Param;
 import com.github.ontio.core.transaction.Transaction;
 import com.github.ontio.sdk.exception.SDKException;
@@ -19,7 +20,26 @@ import java.util.List;
 public class Oep5 {
     private OntSdk sdk;
     private String contractAddress = null;
-    private String oep5abi = "{\"functions\":[{\"name\":\"Main\",\"parameters\":[{\"name\":\"operation\",\"type\":\"\"},{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"name\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"symbol\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"balanceOf\",\"parameters\":[{\"name\":\"owner\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"ownerOf\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"transfer\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"},{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"transferMulti\",\"parameters\":[{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"approve\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"},{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"takeOwnership\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"},{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"concatkey\",\"parameters\":[{\"name\":\"str1\",\"type\":\"\"},{\"name\":\"str2\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"init\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"totalSupply\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"queryTokenIDByIndex\",\"parameters\":[{\"name\":\"idx\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"queryTokenByID\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"getApproved\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"createMultiTokens\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"createOneToken\",\"parameters\":[{\"name\":\"name\",\"type\":\"\"},{\"name\":\"url\",\"type\":\"\"},{\"name\":\"type\",\"type\":\"\"}],\"returntype\":\"\"}]}";
+    private String oep5abi = "{\"contractHash\":\"668a6f4c7a9bf793f359edeb2be9389dd8648626\",\"abi\":{\"functions\":[" +
+            "{\"name\":\"Main\",\"parameters\":[{\"name\":\"operation\",\"type\":\"\"},{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"name\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"symbol\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"balanceOf\",\"parameters\":[{\"name\":\"owner\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"ownerOf\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"transfer\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"},{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"transferMulti\",\"parameters\":[{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"approve\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"}," +
+            "{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"takeOwnership\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"}," +
+            "{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"concatkey\",\"parameters\":[{\"name\":\"str1\",\"type\":\"\"},{\"name\":\"str2\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"init\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"totalSupply\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"queryTokenIDByIndex\",\"parameters\":[{\"name\":\"idx\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"queryTokenByID\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"getApproved\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"createMultiTokens\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"createOneToken\",\"parameters\":[{\"name\":\"name\",\"type\":\"\"},{\"name\":\"url\",\"type\":\"\"}," + "{\"name\":\"type\",\"type\":\"\"}],\"returntype\":\"\"}]}}";
     public Oep5(OntSdk sdk) {
         this.sdk = sdk;
     }
@@ -155,7 +175,7 @@ public class Oep5 {
         return (String) obj;
     }
 
-    public String queryTotalSupply() throws Exception {
+    public long queryTotalSupply() throws Exception {
         if (contractAddress == null) {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
@@ -164,7 +184,7 @@ public class Oep5 {
         func.name = "totalSupply";
         func.setParamsValue();
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
-        return ((JSONObject) obj).getString("Result");
+        return Long.parseLong(Helper.reverse(((JSONObject) obj).getString("Result")), 16);
     }
     public String queryTokenIDByIndex(String idx) throws Exception {
         if (contractAddress == null) {
