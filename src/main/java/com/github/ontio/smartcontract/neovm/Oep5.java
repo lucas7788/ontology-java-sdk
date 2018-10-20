@@ -20,30 +20,27 @@ import java.util.List;
 public class Oep5 {
     private OntSdk sdk;
     private String contractAddress = null;
-    private String oep5abi = "{\"contractHash\":\"668a6f4c7a9bf793f359edeb2be9389dd8648626\",\"abi\":{\"functions\":[" +
-            "{\"name\":\"Main\",\"parameters\":[{\"name\":\"operation\",\"type\":\"\"},{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"name\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"symbol\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"balanceOf\",\"parameters\":[{\"name\":\"owner\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"ownerOf\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"transfer\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"},{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"transferMulti\",\"parameters\":[{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"approve\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"}," +
-            "{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"takeOwnership\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"\"}," +
-            "{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
+    private String oep5abi = "{\"functions\":[{\"name\":\"Main\",\"parameters\":[{\"name\":\"operation\",\"type\":\"\"},{\"name\":\"args\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"name\",\"parameters\":[],\"returntype\":\"\"}," +
+            "{\"name\":\"symbol\",\"parameters\":[],\"returntype\":\"\"}," +
+            "{\"name\":\"balanceOf\",\"parameters\":[{\"name\":\"owner\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"ownerOf\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"transfer\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"ByteArray\"},{\"name\":\"tokenID\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"transferMulti\",\"parameters\":[{\"name\":\"args\",\"type\":\"Array\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"approve\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"ByteArray\"},{\"name\":\"tokenID\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"takeOwnership\",\"parameters\":[{\"name\":\"toAcct\",\"type\":\"ByteArray\"},{\"name\":\"tokenID\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
             "{\"name\":\"concatkey\",\"parameters\":[{\"name\":\"str1\",\"type\":\"\"},{\"name\":\"str2\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"init\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"totalSupply\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
+            "{\"name\":\"init\",\"parameters\":[],\"returntype\":\"\"}," +
+            "{\"name\":\"totalSupply\",\"parameters\":[],\"returntype\":\"\"}," +
             "{\"name\":\"queryTokenIDByIndex\",\"parameters\":[{\"name\":\"idx\",\"type\":\"\"}],\"returntype\":\"\"}," +
             "{\"name\":\"queryTokenByID\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
             "{\"name\":\"getApproved\",\"parameters\":[{\"name\":\"tokenID\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"createMultiTokens\",\"parameters\":[{\"name\":\"\",\"type\":\"\"}],\"returntype\":\"\"}," +
-            "{\"name\":\"createOneToken\",\"parameters\":[{\"name\":\"name\",\"type\":\"\"},{\"name\":\"url\",\"type\":\"\"}," + "{\"name\":\"type\",\"type\":\"\"}],\"returntype\":\"\"}]}}";
-    public Oep5(OntSdk sdk) {
+            "{\"name\":\"createMultiTokens\",\"parameters\":[],\"returntype\":\"\"}," +
+            "{\"name\":\"createOneToken\",\"parameters\":[{\"name\":\"name\",\"type\":\"\"},{\"name\":\"url\",\"type\":\"\"},{\"name\":\"type\",\"type\":\"\"}],\"returntype\":\"\"}]}";
+
+    public Oep5(OntSdk sdk){
         this.sdk = sdk;
     }
-
     public void setContractAddress(String codeHash) {
         this.contractAddress = codeHash.replace("0x", "");
     }
@@ -60,8 +57,7 @@ public class Oep5 {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
-        AbiFunction func = abiinfo.getFunction("Init");
-        func.name = "init";
+        AbiFunction func = abiinfo.getFunction("init");
         if(preExec) {
             byte[] params = BuildParams.serializeAbiFunction(func);
             Transaction tx = sdk.vm().makeInvokeCodeTransaction(getContractAddress(), null, params,null,0, 0);
@@ -81,14 +77,14 @@ public class Oep5 {
         return obj;
     }
 
-    public String ownerOf(String tokenID) throws Exception {
+    public String ownerOf(byte[] tokenID) throws Exception {
         if (contractAddress == null) {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
         AbiFunction func = abiinfo.getFunction("ownerOf");
         func.name = "ownerOf";
-        func.setParamsValue();
+        func.setParamsValue(tokenID);
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
         return ((JSONObject) obj).getString("Result");
     }
@@ -155,7 +151,6 @@ public class Oep5 {
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
         AbiFunction func = abiinfo.getFunction("approve");
-        func.name = "approve";
         func.setParamsValue(oep5Param.toAcct, oep5Param.tokenId);
         Object obj =   sdk.neovm().sendTransaction(contractAddress,owner,payer,gaslimit,gasprice,func, false);
         return (String) obj;
@@ -180,8 +175,7 @@ public class Oep5 {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
-        AbiFunction func = abiinfo.getFunction("TotalSupply");
-        func.name = "totalSupply";
+        AbiFunction func = abiinfo.getFunction("totalSupply");
         func.setParamsValue();
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
         return Long.parseLong(Helper.reverse(((JSONObject) obj).getString("Result")), 16);
@@ -203,7 +197,6 @@ public class Oep5 {
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
         AbiFunction func = abiinfo.getFunction("queryTokenByID");
-        func.name = "queryTokenByID";
         func.setParamsValue(tokenID);
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
         return ((JSONObject) obj).getString("Result");
@@ -224,20 +217,8 @@ public class Oep5 {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
-        AbiFunction func = abiinfo.getFunction("Name");
+        AbiFunction func = abiinfo.getFunction("name");
         func.name = "name";
-        func.setParamsValue();
-        Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
-        return ((JSONObject) obj).getString("Result");
-    }
-
-    public String queryDecimals() throws Exception {
-        if (contractAddress == null) {
-            throw new SDKException(ErrorCode.NullCodeHash);
-        }
-        AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
-        AbiFunction func = abiinfo.getFunction("Decimals");
-        func.name = "decimals";
         func.setParamsValue();
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
         return ((JSONObject) obj).getString("Result");
@@ -248,14 +229,14 @@ public class Oep5 {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
-        AbiFunction func = abiinfo.getFunction("Symbol");
+        AbiFunction func = abiinfo.getFunction("symbol");
         func.name = "symbol";
         func.setParamsValue();
         Object obj =   sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
-        return ((JSONObject) obj).getString("Result");
+        return new String(Helper.hexToBytes(Helper.reverse(((JSONObject) obj).getString("Result"))));
     }
 
-    public String queryBalanceOf(String addr) throws Exception {
+    public long queryBalanceOf(String addr) throws Exception {
         if (contractAddress == null) {
             throw new SDKException(ErrorCode.NullCodeHash);
         }
@@ -263,7 +244,7 @@ public class Oep5 {
             throw new SDKException(ErrorCode.ParamError);
         }
         AbiInfo abiinfo = JSON.parseObject(oep5abi, AbiInfo.class);
-        AbiFunction func = abiinfo.getFunction("BalanceOf");
+        AbiFunction func = abiinfo.getFunction("balanceOf");
         func.name = "balanceOf";
         func.setParamsValue(Address.decodeBase58(addr).toArray());
         Object obj =  sdk.neovm().sendTransaction(contractAddress,null,null,0,0,func, true);
@@ -271,6 +252,6 @@ public class Oep5 {
         if(balance.equals("")){
             balance = "00";
         }
-        return balance;
+        return Long.parseLong(Helper.reverse(balance), 16);
     }
 }

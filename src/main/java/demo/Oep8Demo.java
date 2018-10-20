@@ -36,20 +36,20 @@ public class Oep8Demo {
                 long name = sdk.neovm().oep8().queryDecimals();
                 System.out.println("decimal: " + name);
             }
-            if(true){
-                byte[] tokenId = Helper.hexToBytes("09");
+            if(false){
+                byte[] tokenId = Helper.hexToBytes("02");
                 long name = sdk.neovm().oep8().queryBalanceOf(account.getAddressU160().toBase58(), tokenId);
                 System.out.println("balance: " + name);
                 return;
             }
-            if(true){
+            if(false){
                 String txhash = sdk.neovm().oep8().sendCompound(account, account, 71378, 0);
                 Thread.sleep(3);
                 System.out.println(sdk.getConnect().getSmartCodeEvent(txhash));
             }
-            if (false){
-                byte[] tokenId = Helper.hexToBytes("01");
-                String txhash = sdk.neovm().oep8().sendTransfer(account,account1.getAddressU160().toBase58(),tokenId,10,account,20000,0);
+            if (true){
+                byte[] tokenId = Helper.hexToBytes("02");
+                String txhash = sdk.neovm().oep8().sendTransfer(account,account1.getAddressU160().toBase58(),tokenId,1,account,20000,0);
                 System.out.println("txhash: " + txhash);
                 return;
             }
@@ -116,10 +116,11 @@ public class Oep8Demo {
 
     public static OntSdk getOntSdk() throws Exception {
 //        String ip = "http://139.219.108.204";
-        String ip = "http://127.0.0.1";
+//        String ip = "http://polaris1.ont.io";
 //        ip= "http://139.219.138.201";
 //        String ip = "http://101.132.193.149";
 //        String ip = "http://polaris1.ont.io";
+        String ip= "http://127.0.0.1";
         String restUrl = ip + ":" + "20334";
         String rpcUrl = ip + ":" + "20336";
         String wsUrl = ip + ":" + "20335";

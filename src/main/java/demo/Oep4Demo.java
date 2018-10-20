@@ -6,6 +6,8 @@ import com.github.ontio.common.Address;
 import com.github.ontio.common.Helper;
 import com.github.ontio.core.asset.State;
 import com.github.ontio.core.transaction.Transaction;
+import com.github.ontio.crypto.SignatureScheme;
+
 import java.math.BigInteger;
 
 public class Oep4Demo {
@@ -26,12 +28,24 @@ public class Oep4Demo {
             com.github.ontio.account.Account acct5 = new com.github.ontio.account.Account(Helper.hexToBytes(privatekey5), ontSdk.defaultSignScheme);
 
             Account acct = new com.github.ontio.account.Account(Helper.hexToBytes(privatekey0), ontSdk.defaultSignScheme);
-            System.out.println("recv:"+acct.getAddressU160().toBase58());
-            System.out.println("acct1:"+acct1.getAddressU160().toBase58());
-            System.out.println(Helper.toHexString(acct1.getAddressU160().toArray()));
-
-            showBalance(ontSdk,new Account[]{acct1,acct2,acct3});
+//            System.out.println("recv:"+acct.getAddressU160().toBase58());
+//            System.out.println("acct1:"+acct1.getAddressU160().toBase58());
+//            System.out.println(Helper.toHexString(acct1.getAddressU160().toArray()));
+//
+//            showBalance(ontSdk,new Account[]{acct1,acct2,acct3});
             System.out.println("------------------------------------------------------");
+            if(true){
+                System.out.println(ontSdk.neovm().oep4().queryBalanceOf("AHX1wzvdw9Yipk7E9MuLY4GGX4Ym9tHeDe"));
+                System.out.println(ontSdk.neovm().oep4().queryBalanceOf("AZcodN6VwiL3x7GDpd89Htw2XoRReAkkfD"));
+                Account acc = new Account(Helper.hexToBytes("ac0795d4fe43daa3d7568eec0e1d30aeed9e24219b476b5eb583cd775b5410b9"), SignatureScheme.SHA256WITHECDSA);
+                Account acc2 = new Account(Helper.hexToBytes("02d61db0bde7480af3d481bd950124db489fe9f249ec7a1f362d0c9b40e56aba"), SignatureScheme.SHA256WITHECDSA);
+                Account account = new Account(Helper.hexToBytes("f9d2d30ffb22dffdf4f14ad6f1303460efc633ea8a3014f638eaa19c259bada1"), SignatureScheme.SHA256WITHECDSA);
+//                ontSdk.neovm().oep4().sendTransfer(account, acc.getAddressU160().toBase58(),100,account,20000,0);
+//                ontSdk.neovm().oep4().sendApprove(acc,account.getAddressU160().toBase58(),10,account,20000,0);
+                System.out.println(ontSdk.neovm().oep4().queryAllowance("AZcodN6VwiL3x7GDpd89Htw2XoRReAkkfD", "AHX1wzvdw9Yipk7E9MuLY4GGX4Ym9tHeDe"));
+
+                return;
+            }
 
             if(false) {
 //                long gasLimit = ontSdk.neovm().oep4().sendInitPreExec(acct,acct,30000,0);
@@ -105,12 +119,12 @@ public class Oep4Demo {
                 System.out.println(new BigInteger(Helper.reverse(Helper.hexToBytes(totalSupply))).longValue());
             }
 
-            String balance = ontSdk.neovm().oep4().queryBalanceOf(acct1.getAddressU160().toBase58());
-            System.out.println(Long.parseLong(Helper.reverse(balance),16));
+            long balance = ontSdk.neovm().oep4().queryBalanceOf(acct1.getAddressU160().toBase58());
+
 
 //            System.exit(0);
 
-            String decimals = ontSdk.neovm().oep4().queryDecimals();
+            long decimals = ontSdk.neovm().oep4().queryDecimals();
             System.out.println(decimals);
 
             String name = ontSdk.neovm().oep4().queryName();
@@ -124,9 +138,9 @@ public class Oep4Demo {
 
     public static void showBalance(OntSdk ontSdk,Account[] accounts) throws Exception {
         for (int i=0;i<accounts.length;i++){
-            String balance = ontSdk.neovm().oep4().queryBalanceOf(accounts[i].getAddressU160().toBase58());
+            long balance = ontSdk.neovm().oep4().queryBalanceOf(accounts[i].getAddressU160().toBase58());
             int a = i+1;
-            System.out.println("account"+ a +":"+ Long.parseLong(Helper.reverse(balance),16));
+            System.out.println("account"+ a +":"+ balance);
         }
     }
 
@@ -146,7 +160,7 @@ public class Oep4Demo {
         wm.setRpc(rpcUrl);
         wm.setRestful(restUrl);
         wm.setDefaultConnect(wm.getRestful());
-        wm.neovm().oep4().setContractAddress(Helper.reverse("259b2a7a08bb97b66eb3722d512650767f66d153"));
+        wm.neovm().oep4().setContractAddress(Helper.reverse("10dc7edee6131b1815df99ef5eca8f86184db01c"));
         wm.openWalletFile("nep5.json");
 
 
