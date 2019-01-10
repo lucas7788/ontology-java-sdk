@@ -73,6 +73,7 @@ codeStr="57c56b6c766b00527ac46c766b51527ac4616c766b51c300c36c766b52527ac46c766b5
             config.tx.sigs[0].pubKeys[0] = acct1.serializePublicKey();
             config.tx.sigs[0].sigData = new byte[1][];
             config.tx.sigs[0].sigData[0] = config.tx.sign(acct1, acct1.getSignatureScheme());
+            System.out.println("tx: " + config.tx.toHexString());
             int num = 0;
             while (true) {
                 if(engine.Contexts.size() == 0){

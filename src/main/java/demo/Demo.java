@@ -24,6 +24,7 @@ import com.github.ontio.OntSdk;
 import com.github.ontio.common.Address;
 import com.github.ontio.common.Helper;
 import com.github.ontio.core.block.Block;
+import com.github.ontio.crypto.SignatureScheme;
 import com.github.ontio.sdk.wallet.Account;
 import com.github.ontio.sdk.wallet.Identity;
 
@@ -38,6 +39,20 @@ public class Demo {
     public static void main(String[] args) {
         try {
             OntSdk ontSdk = getOntSdk();
+
+
+            if(true){
+                com.github.ontio.account.Account account = new com.github.ontio.account.Account(SignatureScheme.SHA256WITHECDSA);
+
+                byte[] sig = ontSdk.signatureData(account, "test".getBytes());
+                System.out.println(Helper.toHexString(sig));
+
+                System.out.println(Helper.toHexString(account.serializePublicKey()));
+
+                System.out.println(ontSdk.verifySignature(account.serializePublicKey(),"test".getBytes(), sig));;
+
+                return;
+            }
 
 
             if(false){
