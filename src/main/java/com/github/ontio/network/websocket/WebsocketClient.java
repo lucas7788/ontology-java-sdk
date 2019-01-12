@@ -367,7 +367,7 @@ public class WebsocketClient extends AbstractConnector {
     }
 
     @Override
-    public String getSideChainData(int sideChainID) throws ConnectorException, IOException {
+    public String getSideChainData(long sideChainID) throws ConnectorException, IOException {
         return null;
     }
 

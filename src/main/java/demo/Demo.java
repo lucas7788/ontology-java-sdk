@@ -41,6 +41,7 @@ public class Demo {
             OntSdk ontSdk = getOntSdk();
 
 
+
             if(true){
                 com.github.ontio.account.Account account = new com.github.ontio.account.Account(SignatureScheme.SHA256WITHECDSA);
 

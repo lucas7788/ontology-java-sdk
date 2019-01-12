@@ -11,6 +11,7 @@ import com.github.ontio.core.transaction.Transaction;
 import com.github.ontio.crypto.SignatureScheme;
 import com.github.ontio.network.exception.ConnectorException;
 import com.github.ontio.sdk.exception.SDKException;
+import com.github.ontio.sdk.wallet.Identity;
 import com.github.ontio.smartcontract.neovm.abi.AbiFunction;
 import com.github.ontio.smartcontract.neovm.abi.AbiInfo;
 import com.github.ontio.smartcontract.neovm.abi.BuildParams;
@@ -27,7 +28,9 @@ public class MyGame {
     public static OntSdk sdk = OntSdk.getInstance();
     public static String testRpc = "http://polaris1.ont.io:20336";
     public static String localRpc = "http://127.0.0.1:20336";
-    public static String contractAddr = "2735dc9a30155fd5a0761673899143fd378953cd";
+    public static String zhuwangRpc = "http://dappnode1.ont.io:20336";
+    public static String contractAddr = "95adaa30262e21cefe07bb99624d6249ce0b170d";
+    public static String password = "LUlu@665211";
 
     public static Account account;
     public static Account account1;
@@ -39,6 +42,8 @@ public class MyGame {
     public static Account account7;
     public static Account adminAccount;
     public static Account accountN;
+
+    public static Account moneyAccount;
 
 
 
@@ -53,6 +58,7 @@ public class MyGame {
                 "{\"name\":\"startNewRound\",\"parameters\":[],\"returntype\":\"\"}," +
                 "{\"name\":\"endCurrentRound\",\"parameters\":[],\"returntype\":\"\"}," +
                 "{\"name\":\"withdrawOperation\",\"parameters\":[{\"name\":\"account\",\"type\":\"\"}],\"returntype\":\"\"}," +
+                "{\"name\":\"withdrawAdmin\",\"parameters\":[{\"name\":\"account\",\"type\":\"ByteArray\"}, {\"name\":\"ongAmount\",\"type\":\"Integer\"}],\"returntype\":\"\"}," +
                 "{\"name\":\"withdrawShareHolder\",\"parameters\":[{\"name\":\"account\",\"type\":\"\"}],\"returntype\":\"\"}," +
                 "{\"name\":\"withdrawFee\",\"parameters\":[{\"name\":\"account\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
                 "{\"name\":\"buyKey\",\"parameters\":[{\"name\":\"account\",\"type\":\"ByteArray\"},{\"name\":\"invitor\",\"type\":\"ByteArray\"}],\"returntype\":\"\"}," +
@@ -82,7 +88,7 @@ public class MyGame {
                 "{\"name\":\"Require\",\"parameters\":[{\"name\":\"condition\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"RequireScriptHash\",\"parameters\":[{\"name\":\"key\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"RequireWitness\",\"parameters\":[{\"name\":\"witness\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"Add\",\"parameters\":[{\"name\":\"a\",\"type\":\"\"},{\"name\":\"b\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"Sub\",\"parameters\":[{\"name\":\"a\",\"type\":\"\"},{\"name\":\"b\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"Mul\",\"parameters\":[{\"name\":\"a\",\"type\":\"\"},{\"name\":\"b\",\"type\":\"\"}],\"returntype\":\"\"},{\"name\":\"Div\",\"parameters\":[{\"name\":\"a\",\"type\":\"\"},{\"name\":\"b\",\"type\":\"\"}],\"returntype\":\"\"}]}";
 
 
-        sdk.setRpc(testRpc);
+        sdk.setRpc(zhuwangRpc);
         sdk.openWalletFile("cynowallet.dat");
         abiInfo = JSON.parseObject(abi, AbiInfo.class);
         String privateKey = Account.getGcmDecodedPrivateKey("ya+Hu00xI2DDeq9UxKco0GCqM02qJLzTNy/sD9G+ysFBjkoIsomNsu4245y5Pi+G",
@@ -90,6 +96,13 @@ public class MyGame {
                 16384, SignatureScheme.SHA256WITHECDSA);
         account = new Account(Helper.hexToBytes(privateKey), SignatureScheme.SHA256WITHECDSA);
         adminAccount = sdk.getWalletMgr().getAccount("AbPRaepcpBAFHz9zCj4619qch4Aq5hJARA","LUlu@665211");
+
+        String moneyAdminPrivate = Account.getGcmDecodedPrivateKey("h+vi+SA9ZGZb9GFZfwXbTnzctBCigKAI5kWkQvQdNGvwub1e2VTxF9WsCo2zhLcF",
+                "LUlu@665211", "AYsaNHgtv9CWYsmhiRVcEhPQUk5nbgQ3Y3", Base64.getDecoder().decode("CQZQkcfX8JtJICHrGtrSug=="),
+                16384, SignatureScheme.SHA256WITHECDSA);
+
+        moneyAccount = new Account(Helper.hexToBytes(moneyAdminPrivate), SignatureScheme.SHA256WITHECDSA);
+
 
         account1 = getAccount("wR9S/JYwMDfCPWFGEy5DEvWfU14k9suZuL4+woGtfhZJf5+KyL9VJqMi/wGTOd1i","passwordtest","AZqk4i7Zhfhc1CRUtZYKrLw4YTSq4Y9khN","ZaIL8DxNaQ91fkMHAdiBjQ==");
         account2 = getAccount("PCj/a4zUgYnOBNZUVEaXBK61Sq4due8w2RUzrumO3Bm0hZ/3v4mlDiXYYvmmBZUk","passwordtest","ARpjnrnHEjXhg4aw7vY6xsY6CfQ1XEWzWC","wlz1h439j0GwsWhGBByMxg==");
@@ -100,7 +113,7 @@ public class MyGame {
         account7 = getAccount("EyXxszzKh09jszQXMIFJTmbujnojOzYzPU4cC0wOpuegDgVcRFllATQ81zD0Rp8s","passwordtest","AK3YRcRvKrASQ6nTfW48Z4iMZ2sDTDRiMC","jbwUF7JxgsiJq5QAy5dfug==");
 
 
-        boolean getCurrentRound2 = true;
+        boolean getCurrentRound2 = false;
         boolean deploy = false;
         boolean init = false;
         boolean startNewRound = false;
@@ -118,6 +131,7 @@ public class MyGame {
         boolean getCurrentRemainingTime = false;
         boolean getOperationBalance = false;
         boolean withdrawFee = false;
+        boolean withdrawAdmin = false;
         accountN = account1;
 //        account = adminAccount;
 
@@ -227,6 +241,17 @@ public class MyGame {
         getFeeBalance();
     }
 
+    public static void withdrawAdmin() throws Exception {
+        getFeeBalance();
+        AbiFunction func = abiInfo.getFunction("withdrawAdmin");
+        func.setParamsValue(moneyAccount.getAddressU160().toArray(), 100L);
+        String txhash = (String) sdk.neovm().sendTransaction(Helper.reverse(contractAddr),moneyAccount,moneyAccount,2000000,500,func,false);
+        Thread.sleep(6000);
+        Object obj = sdk.getConnect().getSmartCodeEvent(txhash);
+        System.out.println(obj);
+        getFeeBalance();
+    }
+
     public static void getCurrentRound2() throws SDKException, ConnectorException, IOException {
         List paramList = new ArrayList();
         paramList.add("getCurrentRound".getBytes());
@@ -292,9 +317,12 @@ public class MyGame {
     public static void buyKey() throws Exception {
         AbiFunction func = abiInfo.getFunction("buyKey");
         func.setParamsValue(accountN.getAddressU160().toArray(), accountN.getAddressU160().toArray());
-        String txhash = (String) sdk.neovm().sendTransaction(Helper.reverse(contractAddr),accountN,accountN,20000000,500,func,false);
-        Thread.sleep(6000);
-        Object obj = sdk.getConnect().getSmartCodeEvent(txhash);
+//        String txhash = (String) sdk.neovm().sendTransaction(Helper.reverse(contractAddr),accountN,accountN,20000000,500,func,false);
+
+//        System.out.println(txhash);
+//        Thread.sleep(6000);
+//        Object obj = sdk.getConnect().getSmartCodeEvent(txhash);
+        Object obj =  sdk.neovm().sendTransaction(Helper.reverse(contractAddr),accountN,accountN,20000000,500,func,true);
         System.out.println(obj);
     }
     public static void endCurrentRound() throws Exception {

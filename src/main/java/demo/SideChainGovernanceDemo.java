@@ -56,14 +56,15 @@ public class SideChainGovernanceDemo {
         boolean inflation = false;
         boolean rejectInflation = false;
         boolean approveInflation = false;
-        boolean ongSwap = false;
-        boolean ongxSwap = true;
+        boolean ongSwap = true;
+        boolean ongxSwap = false;
         boolean setGlobalParams = false;
         boolean registerNodeToSideChain = false;
         boolean quitNodeToSideChain = false;
         boolean assignFuncsToRole = false;
         boolean assignOntIdsToRole = false;
         System.out.println("sideChainGovernance:" + sideChainGovernance.getSideChain(3092255979L));
+        long sidechainid = 3092255979L;
         if (false) {
             System.out.println(sdk.nativevm().ont().queryBalanceOf(multiAddress.toBase58()));
             return;
@@ -130,7 +131,8 @@ public class SideChainGovernanceDemo {
 //success
             String geneisBlockStr = sdk.getSideChainConnectMgr().getBlockBytes(0);
             System.out.println("geneisBlockStr:" + geneisBlockStr);
-            RegisterSideChainParam param = new RegisterSideChainParam(3092255979L, account.getAddressU160(),1,(long)100*1000000000,(long)100*1000000000,Helper.hexToBytes(geneisBlockStr),identity.ontid.getBytes(),1);
+            RegisterSideChainParam param = new RegisterSideChainParam(3092255979L, account.getAddressU160(),
+                    1,(long)100*1000000000,(long)100*1000000000,Helper.hexToBytes(geneisBlockStr),identity.ontid.getBytes(),1);
             String txhash = sideChainGovernance.registerSideChain(account,param, identity,password, account,20000,0);
             System.out.println("txhash: " + txhash);
             Thread.sleep(6000);
@@ -163,7 +165,7 @@ public class SideChainGovernanceDemo {
 
         if(inflation){
 //            success
-            InflationParam param = new InflationParam(123456,account.getAddressU160(),(long)1000*1000000000,(long)1000*1000000000);
+            InflationParam param = new InflationParam(sidechainid,account.getAddressU160(),(long)1000*1000000000,(long)1000*1000000000);
             String txhash = sideChainGovernance.inflation(account,param,account,20000,0);
             System.out.println(txhash);
             Thread.sleep(6000);
@@ -183,7 +185,7 @@ public class SideChainGovernanceDemo {
         if(approveInflation){
 //            success
 //            String txhash = sideChainGovernance.rejectInflation(accounts,pks,5,"12345678",account,20000,0);
-            String txhash = sideChainGovernance.approveInflation(accounts, pks,5,0,account,20000,0);
+            String txhash = sideChainGovernance.approveInflation(accounts, pks,5,sidechainid,account,20000,0);
             System.out.println(txhash);
             Thread.sleep(6000);
             System.out.println(sdk.getConnect().getSmartCodeEvent(txhash));
@@ -192,7 +194,8 @@ public class SideChainGovernanceDemo {
 
         if(ongSwap){
 //            success
-
+            System.out.println("getBlockHeight:" + sdk.getConnect().getBlockHeight());
+            System.out.println("balance:" + sdk.nativevm().ong().queryBalanceOf(account.getAddressU160().toBase58()));
             SwapParam param = new SwapParam(3092255979L,account.getAddressU160(), 100*1000000000L);
             String txhash = sideChainGovernance.ongSwap(account,param,account,20000,0);
             System.out.println("txhash:" + txhash);
@@ -218,10 +221,7 @@ public class SideChainGovernanceDemo {
             System.out.println(sdk.getConnect().getSmartCodeEvent(txhash));
             return;
         }
-        if(true){
-
-        }
-        if(true){
+        if(false){
             System.out.println(sdk.nativevm().ong().queryBalanceOf(account.getAddressU160().toBase58()));
             Swap swap = new Swap(account.getAddressU160(), 100*100000000);
             String txhash = sdk.sidechainVm().ongX().ongxSwap(account,swap,account,20000,0);
