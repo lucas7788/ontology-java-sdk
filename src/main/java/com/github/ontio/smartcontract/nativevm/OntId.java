@@ -240,9 +240,15 @@ public class OntId {
                 Map publicKeyMap = new HashMap();
                 publicKeyMap.put("PubKeyId", ontid + "#keys-" + String.valueOf(br.readInt()));
                 byte[] pubKey = br.readVarBytes();
-                publicKeyMap.put("Type", KeyType.fromLabel(pubKey[0]));
-                publicKeyMap.put("Curve", Curve.fromLabel(pubKey[1]));
-                publicKeyMap.put("Value", Helper.toHexString(pubKey));
+                if(pubKey.length == 33){
+                    publicKeyMap.put("Type", KeyType.ECDSA.name());
+                    publicKeyMap.put("Curve", Curve.P256);
+                    publicKeyMap.put("Value", Helper.toHexString(pubKey));
+                } else {
+                    publicKeyMap.put("Type", KeyType.fromLabel(pubKey[0]));
+                    publicKeyMap.put("Curve", Curve.fromLabel(pubKey[1]));
+                    publicKeyMap.put("Value", Helper.toHexString(pubKey));
+                }
                 pubKeyList.add(publicKeyMap);
             } catch (Exception e) {
                 break;
@@ -358,7 +364,7 @@ public class OntId {
         if (recovery != null) {
             addr = recovery.replace(Common.didont, "");
         } else {
-            addr = ontid.replace(Common.didont, "");
+            addr = ontid;
         }
         sdk.signTx(tx, addr, password,salt);
         sdk.addSign(tx, payerAcct);
@@ -368,7 +374,29 @@ public class OntId {
         }
         return null;
     }
-
+    public String sendAddPubKey(String ontid, Account controler, String newpubkey, Account payerAcct, long gaslimit, long gasprice) throws Exception {
+        if (ontid == null || ontid.equals("") || payerAcct == null) {
+            throw new SDKException(ErrorCode.ParamErr("parameter should not be null"));
+        }
+        if (gasprice < 0 || gaslimit < 0) {
+            throw new SDKException(ErrorCode.ParamErr("gas or gaslimit should not be less than 0"));
+        }
+        if (contractAddress == null) {
+            throw new SDKException(ErrorCode.NullCodeHash);
+        }
+        byte[] arg;
+        List list = new ArrayList();
+        list.add(new Struct().add(ontid.getBytes(), Helper.hexToBytes(newpubkey), controler.serializePublicKey()));
+        arg = NativeBuildParams.createCodeParamsScript(list);
+        Transaction tx = sdk.vm().buildNativeParams(new Address(Helper.hexToBytes(contractAddress)),"addKey",arg,payerAcct.getAddressU160().toBase58(),gaslimit,gasprice);
+        sdk.addSign(tx, controler);
+        sdk.addSign(tx, payerAcct);
+        boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
+        if (b) {
+            return tx.hash().toString();
+        }
+        return null;
+    }
     /**
      * @param ontid
      * @param password
@@ -457,7 +485,7 @@ public class OntId {
         Transaction tx = makeRemovePubKey(ontid, recovery, password,salt, removePubkey, payerAcct.getAddressU160().toBase58(), gaslimit, gasprice);
         String addr;
         if (recovery == null) {
-            addr = ontid.replace(Common.didont, "");
+            addr = ontid;//.replace(Common.didont, "");
         } else {
             addr = recovery.replace(Common.didont, "");
         }
@@ -469,7 +497,29 @@ public class OntId {
         }
         return null;
     }
-
+    public String sendRemovePubKey(String ontid, Account controler, String removePubkey, Account payerAcct, long gaslimit, long gasprice) throws Exception {
+        if (ontid == null || ontid.equals("") || payerAcct == null) {
+            throw new SDKException(ErrorCode.ParamErr("parameter should not be null"));
+        }
+        if (gasprice < 0 || gaslimit < 0) {
+            throw new SDKException(ErrorCode.ParamErr("gas or gaslimit should not be less than 0"));
+        }
+        if (contractAddress == null) {
+            throw new SDKException(ErrorCode.NullCodeHash);
+        }
+        byte[] arg;
+        List list = new ArrayList();
+        list.add(new Struct().add(ontid.getBytes(), Helper.hexToBytes(removePubkey), controler.serializePublicKey()));
+        arg = NativeBuildParams.createCodeParamsScript(list);
+        Transaction tx = sdk.vm().buildNativeParams(new Address(Helper.hexToBytes(contractAddress)),"removeKey",arg,payerAcct.getAddressU160().toBase58(),gaslimit,gasprice);
+        sdk.addSign(tx, controler);
+        sdk.addSign(tx, payerAcct);
+        boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
+        if (b) {
+            return tx.hash().toString();
+        }
+        return null;
+    }
     /**
      * @param ontid
      * @param password
@@ -550,7 +600,7 @@ public class OntId {
         }
         String addr = ontid.replace(Common.didont, "");
         Transaction tx = makeAddRecovery(ontid, password,salt, recoveryAddr, payerAcct.getAddressU160().toBase58(), gaslimit, gasprice);
-        sdk.signTx(tx, addr, password,salt);
+        sdk.signTx(tx, ontid, password,salt);
         sdk.addSign(tx, payerAcct);
         boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
         if (b) {
@@ -702,7 +752,7 @@ public class OntId {
         }
         String addr = ontid.replace(Common.didont, "");
         Transaction tx = makeAddAttributes(ontid, password, salt,attributes, payerAcct.getAddressU160().toBase58(), gaslimit, gasprice);
-        sdk.signTx(tx, addr, password,salt);
+        sdk.signTx(tx, ontid, password,salt);
         sdk.addSign(tx, payerAcct);
         boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
         if (b) {
@@ -710,7 +760,34 @@ public class OntId {
         }
         return null;
     }
-
+    public String sendAddAttributes(String ontid, Account controler, Attribute[] attributes, Account payerAcct, long gaslimit, long gasprice) throws Exception {
+        if (ontid == null || ontid.equals("") || attributes == null || attributes.length == 0 || payerAcct == null) {
+            throw new SDKException(ErrorCode.ParamErr("parameter should not be null"));
+        }
+        if (gasprice < 0 || gaslimit < 0) {
+            throw new SDKException(ErrorCode.ParamErr("gas or gaslimit should not be less than 0"));
+        }
+        if (contractAddress == null) {
+            throw new SDKException(ErrorCode.NullCodeHash);
+        }
+        List list = new ArrayList();
+        Struct struct = new Struct().add(ontid.getBytes());
+        struct.add(attributes.length);
+        for (int i = 0; i < attributes.length; i++) {
+            struct.add(attributes[i].key, attributes[i].valueType, attributes[i].value);
+        }
+        struct.add(controler.serializePublicKey());
+        list.add(struct);
+        byte[] args = NativeBuildParams.createCodeParamsScript(list);
+        Transaction tx = sdk.vm().buildNativeParams(new Address(Helper.hexToBytes(contractAddress)),"addAttributes",args,payerAcct.getAddressU160().toBase58(),gaslimit,gasprice);
+        sdk.addSign(tx, controler);
+        sdk.addSign(tx, payerAcct);
+        boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
+        if (b) {
+            return tx.hash().toString();
+        }
+        return null;
+    }
     /**
      * @param ontid
      * @param password
@@ -769,7 +846,7 @@ public class OntId {
         }
         String addr = ontid.replace(Common.didont, "");
         Transaction tx = makeRemoveAttribute(ontid, password, salt,path, payerAcct.getAddressU160().toBase58(), gaslimit, gasprice);
-        sdk.signTx(tx, addr, password,salt);
+        sdk.signTx(tx, ontid, password,salt);
         sdk.addSign(tx, payerAcct);
         boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
         if (b) {
@@ -777,7 +854,28 @@ public class OntId {
         }
         return null;
     }
-
+    public String sendRemoveAttribute(String ontid, Account controler, String path, Account payerAcct, long gaslimit, long gasprice) throws Exception {
+        if (ontid == null || ontid.equals("") || payerAcct == null || path == null || path.equals("")) {
+            throw new SDKException(ErrorCode.ParamErr("parameter should not be null"));
+        }
+        if (gasprice < 0 || gaslimit < 0) {
+            throw new SDKException(ErrorCode.ParamErr("gas or gaslimit should not be less than 0"));
+        }
+        if (contractAddress == null) {
+            throw new SDKException(ErrorCode.NullCodeHash);
+        }
+        List list = new ArrayList();
+        list.add(new Struct().add(ontid.getBytes(), path.getBytes(), controler.serializePublicKey()));
+        byte[] arg = NativeBuildParams.createCodeParamsScript(list);
+        Transaction tx = sdk.vm().buildNativeParams(new Address(Helper.hexToBytes(contractAddress)),"removeAttribute",arg,payerAcct.getAddressU160().toBase58(),gaslimit,gasprice);
+        sdk.addSign(tx, controler);
+        sdk.addSign(tx, payerAcct);
+        boolean b = sdk.getConnect().sendRawTransaction(tx.toHexString());
+        if (b) {
+            return tx.hash().toString();
+        }
+        return null;
+    }
     /**
      * @param ontid
      * @param password
