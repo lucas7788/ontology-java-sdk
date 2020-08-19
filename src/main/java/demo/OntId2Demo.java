@@ -144,14 +144,16 @@ public class OntId2Demo {
         String[] presentationContext = new String[]{};
         String[] presentationType = new String[]{"CredentialManagerPresentation"};
         ArrayList<String> challenge = new ArrayList<>();
+        //随机数
         challenge.add("d1b23d3...3d23d32d2");
         ArrayList<Object> domain = new ArrayList<>();
+        //出示给谁
         domain.add(new String[]{"https://example.com"});
         // you can use any ontId as otherSigner if you want
         VerifiablePresentation presentation = owner.createPresentation(
                 new VerifiableCredential[]{verifiableCredential, verifiableCredential2},
                 presentationContext, presentationType, challenge, domain,
-                ownerIdentity.ontid, new OntIdSigner[]{}, ProofPurpose.assertionMethod);
+                ownerIdentity.ontid, new OntIdSigner[]{}, ProofPurpose.assertionMethod);//和proof
         System.out.println("presentation: " + JSON.toJSONString(presentation));
         String jwtPresentation2 = owner.createJWTPresentation(new String[]{jwt1, jwt2},
                 presentationContext, presentationType, ownerIdentity.ontid, challenge.get(0), domain.get(0),

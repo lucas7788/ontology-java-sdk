@@ -11,9 +11,9 @@ public class Proof {
     public String challenge;
     public Object domain;
     public ProofPurpose proofPurpose;
-    public String verificationMethod; // pubkey uri
-    public String hex;
-    public String jws;
+    public String verificationMethod; // pubkey uri，
+    public String hex;//hex编码的签名
+    public String jws;//jws格式的签名   base64编码
 
     public Proof() {
     }
