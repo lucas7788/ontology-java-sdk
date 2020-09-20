@@ -8,11 +8,9 @@ import com.github.ontio.common.Helper;
 import com.github.ontio.core.transaction.Transaction;
 import com.github.ontio.crypto.SignatureScheme;
 import com.github.ontio.io.BinaryReader;
-import com.github.ontio.ontid.Util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,17 +18,13 @@ public class WingDemo {
 
     public static void main(String[] args) throws IOException {
         // 1. sdk初始化
-        String ip = "http://polaris3.ont.io";
-        String rpcUrl = ip + ":" + "20336";
+        String rpcUrl = "http://polaris3.ont.io:20336";
         OntSdk sdk = OntSdk.getInstance();
         sdk.setRpc(rpcUrl);
 
         long gasPrice = 500;
         long gasLimit = 20000;
 
-        if (false){
-
-        }
 
 
         try {
@@ -61,6 +55,7 @@ public class WingDemo {
             Market m = Utils.parseMarket(obj.getString("Result"));
             System.out.println(m);
 
+
             // 4. 查询ftoken的 exchange_rate
             method = "exchangeRateCurrent";
             param = new ArrayList<>();
@@ -71,6 +66,9 @@ public class WingDemo {
             ByteArrayInputStream stream = new ByteArrayInputStream(d);
             BinaryReader reader = new BinaryReader(stream);
             long exchange_rate= Utils.parseU128(reader);
+            System.out.println("exchange_rate: " + exchange_rate);
+
+
 
             // 5. 查询ftoken的 total_borrows
             method = "totalBorrows";
@@ -82,6 +80,7 @@ public class WingDemo {
             stream = new ByteArrayInputStream(d);
             reader = new BinaryReader(stream);
             long totalBorrows= Utils.parseU128(reader);
+            System.out.println("totalBorrows: " + totalBorrows);
 
 
             // 6. 查询ftoken的 total_supply
@@ -94,6 +93,8 @@ public class WingDemo {
             stream = new ByteArrayInputStream(d);
             reader = new BinaryReader(stream);
             long totalSupply= Utils.parseU128(reader);
+            System.out.println("totalSupply: " + totalSupply);
+
 
             // 7. 查询ftoken的 underlyingName
             method = "underlyingName";
@@ -105,11 +106,14 @@ public class WingDemo {
             stream = new ByteArrayInputStream(d);
             reader = new BinaryReader(stream);
             String underlyingName = reader.readVarString();
+            System.out.println("underlyingName: " + underlyingName);
+
 
             // 8. 查询underlying_price 要从oralce合约中查询
-            String oracleContractAddr = "";
+            String oracleContractAddr = "2927cb865be38d0fddce9cd42b38864074c82ad5";
             method = "getUnderlyingPrice";
             param = new ArrayList<>();
+            param.add(underlyingName);
             tx = sdk.wasmvm().makeInvokeCodeTransaction(oracleContractAddr,method,param,userAccount.getAddressU160(),gasLimit, gasPrice);
             res = sdk.getConnect().sendRawTransactionPreExec(tx.toHexString());
             obj = ((JSONObject)res);
@@ -117,6 +121,7 @@ public class WingDemo {
             stream = new ByteArrayInputStream(d);
             reader = new BinaryReader(stream);
             long underlyingPrice = Utils.parseU128(reader);
+            System.out.println("underlyingPrice:" + underlyingPrice);
 
 
             // 9. 查询ftoken 的 symbol
@@ -129,22 +134,24 @@ public class WingDemo {
             stream = new ByteArrayInputStream(d);
             reader = new BinaryReader(stream);
             String symbol = reader.readVarString();
+            System.out.println("symbol:" + symbol);
 
 
             // 9. 查询wing_distributed
             // flash合约的wingDistributedNum方法，传入ftoken address
-            String flashContractAddr = "";
+            String comptrollerContractAddr = "791d42c167d19f05a6b1936896d989f442f0ff58";
             method = "wingDistributedNum";
             param = new ArrayList<>();
             param.add(markets[0]);
-            tx = sdk.wasmvm().makeInvokeCodeTransaction(flashContractAddr,method,param,userAccount.getAddressU160(),gasLimit, gasPrice);
+            tx = sdk.wasmvm().makeInvokeCodeTransaction(comptrollerContractAddr,method,param,userAccount.getAddressU160(),gasLimit, gasPrice);
             res = sdk.getConnect().sendRawTransactionPreExec(tx.toHexString());
             obj = ((JSONObject)res);
             d = Helper.hexToBytes(obj.getString("Result"));
             stream = new ByteArrayInputStream(d);
             reader = new BinaryReader(stream);
             long wingDistributedNum = Utils.parseU128(reader);
-
+            System.out.println("wingDistributedNum: " + wingDistributedNum);
+           
         } catch (Exception e) {
             e.printStackTrace();
         }

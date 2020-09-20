@@ -31,12 +31,17 @@ public class Market implements Serializable {
 
     @Override
     public void deserialize(BinaryReader reader) throws IOException {
-        this.addr.deserialize(reader);
-        this.insuranceAddr.deserialize(reader);
+        try {
+            this.addr = reader.readSerializable(Address.class);
+            this.insuranceAddr = reader.readSerializable(Address.class);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
         this.isListed = reader.readBoolean();
         this.receiveWing = reader.readBoolean();
-        byte[] weight = reader.readBytes(16);
-        BigInteger b = Helper.BigIntFromNeoBytes(weight);
         this.wingWeight = Utils.parseU128(reader);
         this.collateralFactorMantissa = Utils.parseU128(reader);
         this.underlyingDecimals = reader.readInt();
