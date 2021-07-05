@@ -53,7 +53,7 @@ public class PayloadDemo {
 
         State state;
         //parse native
-        for (long amount = 100000; amount < 10000000; amount++) {
+        for (long amount = 100000; amount < 100000; amount++) {
             System.out.println("amount:" + amount);
             Transaction tx = ontSdk.nativevm().ont().makeTransfer(from, to, amount, from, 20000, 500);
             TransferInfo info = parseTxPayload(tx);
@@ -94,7 +94,8 @@ public class PayloadDemo {
             InvokeCode invokeTx = (InvokeCode) tx;
             byte[] code = invokeTx.code;
             int len = code.length;
-            if (len > 44) {
+            //22 + 1 + 1 + 1 + 20 = 45
+            if (len > 45) {
                 System.arraycopy(code, len - 22, nativeInvoke, 0, nativeInvokeNameBytes.length);
                 if (new String(nativeInvoke).equals(NATIVE_INVOKE_NAME)) {
                     return parseNativePayload(code);
